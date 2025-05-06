@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="chat-container">
+    <h1>Welcome to Hackerverse</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="message" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const token = localStorage.getItem('token');
+    const username = 'user1'; // Ganti dengan username yang valid
+
+    socket.emit('joinRoom', username, 'mainRoom');
+
+    function sendMessage() {
+      const msg = document.getElementById('message').value;
+      if (msg.trim()) {
+        socket.emit('chat', { user: username, msg, room: 'mainRoom' });
+        document.getElementById('message').value = '';
+      }
+    }
+
+    socket.on('chat', (data) => {
+      const chatbox = document.getElementById('chatbox');
+      chatbox.innerHTML += `<p><strong>${data.user}</strong>: ${data.msg}</p>`;
+    });
+  </script>
+</body>
+</html>

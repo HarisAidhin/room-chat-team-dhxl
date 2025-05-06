@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hacker Chat Room</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="form-container" style="width: 100%; max-width: 600px;">
+    <h2>Chat Room - HackerVerse</h2>
+    <div id="chat-box" style="height: 300px; overflow-y: scroll; background: #1e1e1e; padding: 10px; margin-bottom: 10px;"></div>
+    <input type="text" id="message" placeholder="Type your message..." onkeypress="handleKey(event)">
+    <button onclick="send()">Send</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const username = localStorage.getItem('username');
+    if (!username) location.href = 'login.html';
+
+    socket.emit('join', username);
+
+    socket.on('chat', (data) => {
+      const box = document.getElementById('chat-box');
+      const msg = document.createElement('div');
+      msg.textContent = `[${data.user}] ${data.msg}`;
+      box.appendChild(msg);
+      box.scrollTop = box.scrollHeight;
+    });
+
+    function send() {
+      const msg = document.getElementById('message').value;
+      if (!msg.trim()) return;
+      socket.emit('chat', { user: username, msg });
+      document.getElementById('message').value = '';
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter') send();
+    }
+
+    function logout() {
+      localStorage.clear();
+      location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
